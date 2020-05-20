@@ -10,7 +10,7 @@ import signal
 LOWER_DURATION_LIMIT = 55
 UPPER_DURATION_LIMIT = 65
 
-DEBUG = True
+DEBUG = False
 
 
 def isVideoOfAccepatableLength(submission):
@@ -20,7 +20,7 @@ def isVideoOfAccepatableLength(submission):
 
     if duration is None:
         assert error
-        return ambigiousLinkAction(submission, error)
+        return ambiguousLinkAction(submission, error)
 
     else:
         assert not error
@@ -102,7 +102,7 @@ def getTrueUrlsFromResult(result):
             yield from getTrueUrlsFromResult(result_)
 
 
-def ambigiuosLinkAction(submission, error):
+def ambiguousLinkAction(submission, error):
     '''Actions to be taken if duration of video can not be determined.
     This can happen when the link doesnt point to a video, or a known
     video source or due to a million of other reason that only a human can tell

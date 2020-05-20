@@ -12,11 +12,11 @@ def main():
 
     for submission in reddit.subreddit("porninaminute").stream.submissions():
 
-        debugPrint("Discovered: " + submission.id)
+        print("Discovered: " + submission.id)
 
-#        if submission.saved:
-#            debugPrint("Skipping Saved: " + submission.id)
-#            continue
+        if submission.saved:
+            debugPrint("Skipping Saved: " + submission.id)
+            continue
 
         if not submission.is_self:
             if not isVideoOfAccepatableLength(submission):
