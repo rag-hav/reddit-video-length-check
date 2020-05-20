@@ -51,7 +51,7 @@ def getVideoDurationFromLink(url):
                 return getDurationUsingFFprobe(result)
 
     except YoutubeDLError as e:
-        return None, "YoutubeDL Failed: " + e.exc_info
+        return None, "YoutubeDL Failed: " + str(e.exc_info[0])
         
 
 def getDurationUsingFFprobe(result):
