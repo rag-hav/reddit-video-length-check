@@ -14,9 +14,9 @@ def main():
 
         debugPrint("Discovered: " + submission.id)
 
-        if submission.saved:
-            debugPrint("Skipping Saved: " + submission.id)
-            continue
+#        if submission.saved:
+#            debugPrint("Skipping Saved: " + submission.id)
+#            continue
 
         if not submission.is_self:
             if not isVideoOfAccepatableLength(submission):

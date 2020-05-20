@@ -10,7 +10,7 @@ import signal
 LOWER_DURATION_LIMIT = 55
 UPPER_DURATION_LIMIT = 65
 
-DEBUG = False
+DEBUG = True
 
 
 def isVideoOfAccepatableLength(submission):
