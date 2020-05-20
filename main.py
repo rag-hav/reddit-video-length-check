@@ -20,7 +20,8 @@ def main():
 
         if not submission.is_self:
             if not isVideoOfAccepatableLength(submission):
-                submission.mod.remove()
+                # submission.mod.remove()
+                submission.report("Reported by bot for not being a minute long")
                 print("Removed: " + submission.permalink)
 
         submission.save()
