@@ -1,7 +1,7 @@
 import time
 from prawcore.exceptions import RequestException, ServerError
-import praw
-import os
+from Reddit import reddit
+from configs import config
 from utils import (
     isVideoOfAccepatableLength,
     SignalHandler,
@@ -10,12 +10,8 @@ from utils import (
 
 signalHandler = SignalHandler()
 
-REMOVAL_MESSAGE = "Your post has been removed for breaking the rule 7. " \
-                "Video must be 60 seconds long.  " \
-                "\n\nContact the moderators of this sub, if " \
-                "you think this was a mistake.  \n\n***\n" \
-                "^(I am a bot and this action was performed automatically.)"
 def main():
+    REMOVAL_MESSAGE = config.REMOVAL_MESSAGE
 
     for submission in reddit.subreddit("porninaminute").stream.submissions():
 
@@ -37,12 +33,6 @@ def main():
         submission.save()
         signalHandler.loopEnd()
 
-reddit = praw.Reddit(
-    client_id=os.getenv("MY_CLIENT_ID"),
-    client_secret=os.getenv("MY_CLIENT_SECRET"),
-    user_agent=os.getenv("MY_USER_AGENT"),
-    username=os.getenv("MY_USERNAME"),
-    password=os.getenv("MY_PASSWORD"))
 
 
 if __name__ == "__main__":

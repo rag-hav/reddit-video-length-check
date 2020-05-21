@@ -1,20 +1,19 @@
 from youtube_dl import YoutubeDL
 from youtube_dl.utils import YoutubeDLError
-from io import StringIO
-from pprint import pprint
-import os
 import subprocess
 import sys
 import signal
 
-
-LOWER_DURATION_LIMIT = 55
-UPPER_DURATION_LIMIT = 65
+from configs import config
 
 DEBUG = False
+LOWER_DURATION_LIMIT = config.LOWER_DURATION_LIMIT
+UPPER_DURATION_LIMIT = config.UPPER_DURATION_LIMIT
+REPORT_ERRORS_ON_POST = config.REPORT_ERRORS_ON_POST
 
 
 def isVideoOfAccepatableLength(submission):
+
     duration, error = getVideoDurationFromLink(submission.url)
 
     if duration is None:
@@ -40,7 +39,8 @@ def getVideoDurationFromLink(url, forceGeneric=False):
 
     try:
         with YoutubeDL(ydlOpts) as ydl:
-            result = ydl.extract_info(url, download=False, force_generic_extractor=forceGeneric)
+            result = ydl.extract_info(url, download=False, 
+                    force_generic_extractor=forceGeneric)
 
     except YoutubeDLError as e:
         if not forceGeneric:
@@ -114,7 +114,8 @@ def ambiguousLinkAction(submission, error):
 
     print("Error with: " + submission.id  + " url: " + submission.url)
     print(error)
-    submission.report("Bot didnt work on this post")
+    if REPORT_ERRORS_ON_POST :
+        submission.report("Bot didnt work on this post")
     return True
 
 
