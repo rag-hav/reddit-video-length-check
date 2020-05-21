@@ -1,5 +1,6 @@
 from youtube_dl import YoutubeDL
 from youtube_dl.utils import YoutubeDLError
+from io import StringIO
 from pprint import pprint
 import os
 import subprocess
@@ -14,9 +15,7 @@ DEBUG = False
 
 
 def isVideoOfAccepatableLength(submission):
-    filename = submission.id
-    url = submission.url
-    duration, error = getVideoDurationFromLink(url)
+    duration, error = getVideoDurationFromLink(submission.url)
 
     if duration is None:
         assert error
@@ -27,31 +26,36 @@ def isVideoOfAccepatableLength(submission):
         return LOWER_DURATION_LIMIT < duration < UPPER_DURATION_LIMIT
 
     
-def getVideoDurationFromLink(url):
+def getVideoDurationFromLink(url, forceGeneric=False):
     '''Checks for duration data on webpage itself, with Youtube-dl.
     calls ffprobe if duration data is not found'''
 
     debugPrint("Checking Url: " + url)
 
     ydlOpts = {
-        "quiet": True,
         "no_warnings": True,
+        "quiet": True,
+        "force_generic_extractor": forceGeneric,
     }
 
     try:
         with YoutubeDL(ydlOpts) as ydl:
-            result = ydl.extract_info(url, download=False)
-
-            if "duration" in result.keys():
-                duration = float(result["duration"])
-                debugPrint("Found duration on webpage: " + str(duration))
-                return duration, None
-
-            else:
-                return getDurationUsingFFprobe(result)
+            result = ydl.extract_info(url, download=False, force_generic_extractor=forceGeneric)
 
     except YoutubeDLError as e:
-        return None, "YoutubeDL Failed: " + str(e.exc_info[0])
+        if not forceGeneric:
+            print("Retrying with generic Extractor")
+            return getVideoDurationFromLink(url, forceGeneric=True)
+        
+        return None, "YoutubeDL Failed"
+
+    if "duration" in result.keys():
+        duration = float(result["duration"])
+        debugPrint("Found duration on webpage: " + str(duration))
+        return duration, None
+
+    else:
+        return getDurationUsingFFprobe(result)
         
 
 def getDurationUsingFFprobe(result):
@@ -109,11 +113,40 @@ def ambiguousLinkAction(submission, error):
     if the bot has a bug or not'''
 
     print("Error with: " + submission.id  + " url: " + submission.url)
-    print(error + '\n')
-    # TODO
+    print(error)
+    submission.report("Bot didnt work on this post")
     return True
 
 
-def debugPrint(string):
+def debugPrint(string=''):
     if DEBUG:
-        print("DEBUG\t" + string)
+        if string:
+            print("DEBUG\t" + string)
+        else:
+            print()
+
+
+class SignalHandler():
+
+    def __init__(self):
+        signal.signal(signal.SIGINT, self._signalHandler)
+        signal.signal(signal.SIGTERM, self._signalHandler)
+        self.exitCondition = False
+        self.inLoop = False
+
+    def _signalHandler(self, signal, frame):
+        print(f"RECIEVED SIGNAL: {signal}, Bye")
+        if not self.inLoop:
+            sys.exit(0)
+        else:
+            self.exitCondition = True
+
+    def loopEnd(self):
+        self.inLoop = False
+
+        if self.exitCondition:
+            sys.exit(0)
+
+    def loopStart(self):
+        self.inLoop = True
+
