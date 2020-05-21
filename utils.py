@@ -9,7 +9,9 @@ from configs import config
 DEBUG = False
 LOWER_DURATION_LIMIT = config.LOWER_DURATION_LIMIT
 UPPER_DURATION_LIMIT = config.UPPER_DURATION_LIMIT
-REPORT_ERRORS_ON_POST = config.REPORT_ERRORS_ON_POST
+REPORT_POSTS_ON_WHICH_BOT_FAILS = config.REPORT_POSTS_ON_WHICH_BOT_FAILS
+MODMAIL_POSTS_ON_WHICH_BOT_FAILS = config.MODMAIL_POSTS_ON_WHICH_BOT_FAILS
+BOT_ERROR_MESSAGE = config.BOT_ERROR_MESSAGE
 
 
 def isVideoOfAccepatableLength(submission):
@@ -114,8 +116,11 @@ def ambiguousLinkAction(submission, error):
 
     print("Error with: " + submission.id  + " url: " + submission.url)
     print(error)
-    if REPORT_ERRORS_ON_POST :
-        submission.report("Bot didnt work on this post")
+    if REPORT_POSTS_ON_WHICH_BOT_FAILS:
+        submission.report(BOT_ERROR_MESSAGE)
+    if MODMAIL_POSTS_ON_WHICH_BOT_FAILS:
+        reddit.subreddit("porninaminute").message(
+                BOT_ERROR_MESSAGE, submission.permalink)
     return True
 
 

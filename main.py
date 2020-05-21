@@ -12,6 +12,7 @@ signalHandler = SignalHandler()
 
 def main():
     REMOVAL_MESSAGE = config.REMOVAL_MESSAGE
+    REASON_ID = config.REASON_ID_FOR_REMOVED_POST 
 
     for submission in reddit.subreddit("porninaminute").stream.submissions():
 
@@ -26,7 +27,7 @@ def main():
 
         if not submission.is_self:
             if not isVideoOfAccepatableLength(submission):
-                submission.mod.remove(reason_id="1505bpacczeq7")
+                submission.mod.remove(reason_id=REASON_ID)
                 submission.mod.send_removal_message(REMOVAL_MESSAGE)
                 print("Removed: " + submission.permalink)
 
