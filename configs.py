@@ -4,16 +4,17 @@ from Reddit import reddit
 # This list contains tuples of format: 
 # (subredditname, nameOfWikiWhereConfigsAre)
 
-SUBREDDITS = [("porninaminute", "porninaminutebot"),
+SUBREDDITS = [
+        ("porninaminute", "porninaminutebot"),
         ]
 
 
 class Config():
-     '''Class to lazily get configs from a subreddit'''
+    '''Class to lazily get configs from a subreddit'''
 
     configDict = None
 
-    def __init__(self, subreddit):
+    def __init__(self, subreddit, wikiname):
         self.SUBREDDIT = subreddit.lower()
         self.WIKINAME = wikiname
 
