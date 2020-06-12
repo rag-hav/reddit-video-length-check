@@ -1,7 +1,7 @@
 import time
 from prawcore.exceptions import RequestException, ServerError
 from Reddit import reddit
-from configs import config
+from configs import configs
 from utils import (
     isVideoOfAccepatableLength,
     SignalHandler,
@@ -11,10 +11,9 @@ from utils import (
 signalHandler = SignalHandler()
 
 def main():
-    REMOVAL_MESSAGE = config.REMOVAL_MESSAGE
-    REASON_ID = config.REASON_ID_FOR_REMOVED_POST 
 
-    for submission in reddit.subreddit("porninaminute").stream.submissions():
+    MULTI_REDDIT = configs["MULTI_REDDIT"]
+    for submission in reddit.subreddit(MULTI_REDDIT).stream.submissions():
 
         if submission.saved:
             debugPrint("Skipping Saved: " + submission.id)
@@ -26,9 +25,10 @@ def main():
         print("Discovered: " + submission.id)
 
         if not submission.is_self:
-            if not isVideoOfAccepatableLength(submission):
-                submission.mod.remove(reason_id=REASON_ID)
-                submission.mod.send_removal_message(REMOVAL_MESSAGE)
+            config = configs[submission.subreddit.display_name.lower()]
+            if not isVideoOfAccepatableLength(submission, config):
+                submission.mod.remove(reason_id=config.REASON_ID)
+                submission.mod.send_removal_message(config.REMOVAL_MESSAGE)
                 print("Removed: " + submission.permalink)
 
         submission.save()

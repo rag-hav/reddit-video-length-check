@@ -1,30 +1,22 @@
 from youtube_dl import YoutubeDL
 from youtube_dl.utils import YoutubeDLError
-import subprocess
 import sys
-import signal
 
-from configs import config
 
 DEBUG = False
-LOWER_DURATION_LIMIT = config.LOWER_DURATION_LIMIT
-UPPER_DURATION_LIMIT = config.UPPER_DURATION_LIMIT
-REPORT_POSTS_ON_WHICH_BOT_FAILS = config.REPORT_POSTS_ON_WHICH_BOT_FAILS
-MODMAIL_POSTS_ON_WHICH_BOT_FAILS = config.MODMAIL_POSTS_ON_WHICH_BOT_FAILS
-BOT_ERROR_MESSAGE = config.BOT_ERROR_MESSAGE
 
 
-def isVideoOfAccepatableLength(submission):
+def isVideoOfAccepatableLength(submission, config):
 
     duration, error = getVideoDurationFromLink(submission.url)
 
     if duration is None:
         assert error
-        return ambiguousLinkAction(submission, error)
+        return ambiguousLinkAction(submission, error, config)
 
     else:
         assert not error
-        return LOWER_DURATION_LIMIT < duration < UPPER_DURATION_LIMIT
+        return config.LOWER_DURATION_LIMIT < duration < config.UPPER_DURATION_LIMIT
 
     
 def getVideoDurationFromLink(url, forceGeneric=False):
@@ -67,6 +59,7 @@ def getDurationUsingFFprobe(result):
 
     output = None
 
+    import subprocess
     for trueUrl in getTrueUrlsFromResult(result):
         debugPrint("Using FFprobe: " + trueUrl )
         output = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
@@ -108,19 +101,20 @@ def getTrueUrlsFromResult(result):
             yield from getTrueUrlsFromResult(result_)
 
 
-def ambiguousLinkAction(submission, error):
+def ambiguousLinkAction(submission, error, config):
     '''Actions to be taken if duration of video can not be determined.
     This can happen when the link doesnt point to a video, or a known
     video source or due to a million of other reason that only a human can tell
     if the bot has a bug or not'''
 
+
     print("Error with: " + submission.id  + " url: " + submission.url)
     print(error)
-    if REPORT_POSTS_ON_WHICH_BOT_FAILS:
-        submission.report(BOT_ERROR_MESSAGE)
-    if MODMAIL_POSTS_ON_WHICH_BOT_FAILS:
-        reddit.subreddit("porninaminute").message(
-                BOT_ERROR_MESSAGE, submission.permalink)
+    if config.REPORT_POSTS_ON_WHICH_BOT_FAILS:
+        submission.report(config.BOT_ERROR_MESSAGE)
+    if config.MODMAIL_POSTS_ON_WHICH_BOT_FAILS:
+        reddit.subreddit(config.SUBREDDIT).message(
+                config.BOT_ERROR_MESSAGE, submission.permalink)
     return True
 
 
@@ -133,8 +127,11 @@ def debugPrint(string=''):
 
 
 class SignalHandler():
+    ''' To ensure processing a post is not interrupted during
+    heroku's cycle'''
 
     def __init__(self):
+        import signal
         signal.signal(signal.SIGINT, self._signalHandler)
         signal.signal(signal.SIGTERM, self._signalHandler)
         self.exitCondition = False
