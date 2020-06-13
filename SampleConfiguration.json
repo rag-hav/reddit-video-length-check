@@ -1,0 +1,10 @@
+
+{
+	"REMOVAL_MESSAGE": "Your post has been removed for breaking the rule 7.\nVideo must be 60 seconds long. \n\nContact the moderators of this sub, if you think this was a mistake.\n\n***\n^(I am a bot and this action was performed automatically.)", 
+	"LOWER_DURATION_LIMIT": 55, 
+	"UPPER_DURATION_LIMIT": 65, 
+	"REPORT_POSTS_ON_WHICH_BOT_FAILS": true, 
+	"MODMAIL_POSTS_ON_WHICH_BOT_FAILS": true, 
+	"BOT_ERROR_MESSAGE": "Bot failed on this post", 
+	"REASON_ID_FOR_REMOVED_POST": "1505bpacczeq7"
+}

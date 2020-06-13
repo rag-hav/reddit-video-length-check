@@ -1,6 +1,11 @@
 import json
 from Reddit import reddit
 
+'''The config for the bot should be present in a wiki on the
+subreddit. The name of the subreddit and the name of that wik
+should be added to the following list.
+A sample configuration file in .json format is given.'''
+
 # This list contains tuples of format: 
 # (subredditname, nameOfWikiWhereConfigsAre)
 
