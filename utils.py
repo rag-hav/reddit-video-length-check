@@ -1,5 +1,6 @@
 from youtube_dl import YoutubeDL
 from youtube_dl.utils import YoutubeDLError
+from Reddit import reddit
 import sys
 
 
@@ -18,7 +19,7 @@ def isVideoOfAccepatableLength(submission, config):
         assert not error
         return config.LOWER_DURATION_LIMIT < duration < config.UPPER_DURATION_LIMIT
 
-    
+
 def getVideoDurationFromLink(url, forceGeneric=False):
     '''Checks for duration data on webpage itself, with Youtube-dl.
     calls ffprobe if duration data is not found'''
@@ -33,27 +34,29 @@ def getVideoDurationFromLink(url, forceGeneric=False):
 
     try:
         with YoutubeDL(ydlOpts) as ydl:
-            result = ydl.extract_info(url, download=False, 
-                    force_generic_extractor=forceGeneric)
+            result = ydl.extract_info(url, download=False,
+                                      force_generic_extractor=forceGeneric)
 
-    except YoutubeDLError as e:
+            if not isinstance(result, dict):
+                raise YoutubeDLError()
+
+            if "duration" in result.keys():
+                duration = float(result["duration"])
+                debugPrint("Found duration on webpage: " + str(duration))
+                return duration, None
+
+            else:
+                return getDurationUsingFFprobe(result)
+
+    except YoutubeDLError as _:
         if not forceGeneric:
             print("Retrying with generic Extractor")
             return getVideoDurationFromLink(url, forceGeneric=True)
-        
+
         return None, "YoutubeDL Failed"
 
-    if "duration" in result.keys():
-        duration = float(result["duration"])
-        debugPrint("Found duration on webpage: " + str(duration))
-        return duration, None
-
-    else:
-        return getDurationUsingFFprobe(result)
-        
 
 def getDurationUsingFFprobe(result):
-    
     '''Uses FFprobe application to get duration metadata from true video url
     adapted from https://stackoverflow.com/a/3844467'''
 
@@ -61,7 +64,7 @@ def getDurationUsingFFprobe(result):
 
     import subprocess
     for trueUrl in getTrueUrlsFromResult(result):
-        debugPrint("Using FFprobe: " + trueUrl )
+        debugPrint("Using FFprobe: " + trueUrl)
         output = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
                                  "format=duration", "-of",
                                  "default=noprint_wrappers=1:nokey=1", trueUrl],
@@ -107,14 +110,13 @@ def ambiguousLinkAction(submission, error, config):
     video source or due to a million of other reason that only a human can tell
     if the bot has a bug or not'''
 
-
-    print("Error with: " + submission.id  + " url: " + submission.url)
+    print("Error with: " + submission.id + " url: " + submission.url)
     print(error)
     if config.REPORT_POSTS_ON_WHICH_BOT_FAILS:
         submission.report(config.BOT_ERROR_MESSAGE)
     if config.MODMAIL_POSTS_ON_WHICH_BOT_FAILS:
         reddit.subreddit(config.SUBREDDIT).message(
-                config.BOT_ERROR_MESSAGE, submission.permalink)
+            config.BOT_ERROR_MESSAGE, submission.permalink)
     return True
 
 
@@ -137,7 +139,7 @@ class SignalHandler():
         self.exitCondition = False
         self.inLoop = False
 
-    def _signalHandler(self, signal, frame):
+    def _signalHandler(self, signal, _):
         print(f"RECIEVED SIGNAL: {signal}, Bye")
         if not self.inLoop:
             sys.exit(0)
@@ -152,4 +154,3 @@ class SignalHandler():
 
     def loopStart(self):
         self.inLoop = True
-

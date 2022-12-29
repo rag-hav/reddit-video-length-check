@@ -1,10 +1,19 @@
 import os
+import sys
 import praw
 
-reddit = praw.Reddit(
-    client_id=os.getenv("MY_CLIENT_ID"),
-    client_secret=os.getenv("MY_CLIENT_SECRET"),
-    user_agent=os.getenv("MY_USER_AGENT"),
-    username=os.getenv("MY_USERNAME"),
-    password=os.getenv("MY_PASSWORD"))
 
+def getVar(varName):
+    value = os.getenv(varName)
+    if value is None:
+        print(f"{varName} environment variable is not set")
+        sys.exit(1)
+    return value
+
+
+reddit = praw.Reddit(
+    client_id=getVar("MY_CLIENT_ID"),
+    client_secret=getVar("MY_CLIENT_SECRET"),
+    user_agent=getVar("MY_USER_AGENT"),
+    username=getVar("MY_USERNAME"),
+    password=getVar("MY_PASSWORD"))

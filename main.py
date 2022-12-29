@@ -46,4 +46,4 @@ if __name__ == "__main__":
             print(e)
             time.sleep(60)
         else:
-            raise "Program Finished Abnormally"
+            raise Exception("Program Finished Abnormally")

@@ -37,7 +37,8 @@ class Config():
 # This dict will contain all Config class objects.
 # Additionally it has MULTI_REDDIT string which is simply
 # "subreddit1+subreddit2+subreddit3" and so on
-configs = {"MULTI_REDDIT" : '+'.join(a[0] for a in SUBREDDITS)}
+configs = dict()
+configs["MULTI_REDDIT"] = '+'.join(a[0] for a in SUBREDDITS)
 
 for subreddit, wikiname in SUBREDDITS:
     configs[subreddit.lower()] = Config(subreddit, wikiname)
