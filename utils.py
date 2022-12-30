@@ -1,5 +1,5 @@
-from youtube_dl import YoutubeDL
-from youtube_dl.utils import YoutubeDLError
+from yt_dlp import YoutubeDL
+from yt_dlp.utils import YoutubeDLError
 from Reddit import reddit
 import sys
 
